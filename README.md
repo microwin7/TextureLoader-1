@@ -1,6 +1,7 @@
 # TextureLoader
 
 Базовая реализация TextureProvider и TextureLoader для GravitLauncher 5.5  
+Спасибо microwin7 за помощь в работе над этим проектом  
 
 - Поддержка `slim`
 - Поддержка загрузки скинов из лаунчера (GravitLauncher 5.5+)
