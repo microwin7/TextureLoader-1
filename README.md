@@ -33,7 +33,7 @@ location /assetloader/ {
     alias PATH_TO_TEXTURELOADER/public;
 }
 ```
-- Настройте конфиг лаунчсервера:
+- Настройте конфиг лаунчсервера:  
 TextureProvider
 ```json
 "textureProvider": {
