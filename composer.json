@@ -1,0 +1,25 @@
+{
+    "name": "gravita/json-texture-provider",
+    "description": "",
+    "type": "project",
+    "require": {
+        "php": "^8.2",
+        "firebase/php-jwt": "^6.9"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Gravita\\JsonTextureProvider\\": "src/",
+            "Gravita\\JsonTextureProvider\\Config\\": "config/"
+        },
+        "files": [
+            "src/functions.php"
+        ]
+    },
+    "authors": [
+        {
+            "name": "gravit0"
+        }
+    ],
+    "minimum-stability": "stable"
+}

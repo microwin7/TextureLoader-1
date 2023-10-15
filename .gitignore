@@ -1,0 +1,3 @@
+vendor
+public/assets/*.png
+config/ecdsa_id.pub
