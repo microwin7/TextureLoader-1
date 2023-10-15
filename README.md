@@ -28,10 +28,10 @@
 - Настройте nginx (предполагается что у вас уже настроено исполнение PHP)
 ```nginx
 location /assets/ {
-    alias PATH_TO_TEXTURELOADER/public/assets;
+    alias PATH_TO_TEXTURELOADER/public/assets/;
 }
 location /assetloader/ {
-    alias PATH_TO_TEXTURELOADER/public;
+    alias PATH_TO_TEXTURELOADER/public/;
 }
 ```
 - Настройте конфиг лаунчсервера:  
