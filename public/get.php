@@ -10,7 +10,7 @@ use function Gravita\JsonTextureProvider\json_response;
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
-$uuid = $_GET["uuid"];
+$uuid = $_GET["uuid"] ?? null;
 
 if (!$uuid) {
     json_response(400, [
@@ -24,11 +24,11 @@ $pdo = $base->pdo;
 
 $stmt = $pdo->prepare("SELECT hash,name,metadata FROM user_assets WHERE uuid=:uuid");
 $stmt->execute(['uuid' => $uuid]);
-$result = [];
+$result = (object)[];
 while (($entity = $stmt->fetch(PDO::FETCH_ASSOC))) {
     $result[$entity["name"]] = [
         "url" => Config::$baseUrl . $entity["hash"] . ".png",
-        "hash" =>  str_replace('=', '', strtr(base64_encode(hex2bin($entity["hash"])), '+/', '-_')),
+        "hash" =>  $entity["hash"],
         "metadata" => json_decode($entity["metadata"], true)
     ];
 }

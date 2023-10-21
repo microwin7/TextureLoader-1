@@ -33,9 +33,9 @@ $base = new Base();
 
 $jwt = $base->parse_jwt_and_verify($jwtToken, $publicKey);
 
-$fileinfo = $_FILES["file"];
+$fileinfo = $_FILES["file"] ?? null;
 $options = json_decode($_POST["options"], true);
-$assetType = $_GET["type"];
+$assetType = $_GET["type"] ?? null;
 if (!$fileinfo) {
     json_response(400, [
         "error" => "Part file not found"
