@@ -24,7 +24,7 @@ $pdo = $base->pdo;
 
 $stmt = $pdo->prepare("SELECT hash,name,metadata FROM user_assets WHERE uuid=:uuid");
 $stmt->execute(['uuid' => $uuid]);
-$result = (object)[];
+$result = new ArrayObject();
 while (($entity = $stmt->fetch(PDO::FETCH_ASSOC))) {
     $result[$entity["name"]] = [
         "url" => Config::$baseUrl . $entity["hash"] . ".png",

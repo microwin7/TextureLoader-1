@@ -7,9 +7,9 @@ class Config
     public static $dbsystem = "pgsql"; //mysql or pgsql
     public static $port = "5432"; // default mysql port 3306 | default pgsql port 5432
     public static $host = 'localhost'; // database host
-    public static $db = 'db'; // database name
-    public static $user = 'user'; // user name
-    public static $password = 'password'; // password
+    public static $db = 'launchserver'; // database name
+    public static $user = 'launchserver'; // user name
+    public static $password = '1111'; // password
     public static $baseUrl = "http://example.com/assets/";
     public static $baseDir = "assets/";
 
