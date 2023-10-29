@@ -28,7 +28,7 @@ $result = new ArrayObject();
 while (($entity = $stmt->fetch(PDO::FETCH_ASSOC))) {
     $result[$entity["name"]] = [
         "url" => Config::$baseUrl . $entity["hash"] . ".png",
-        "hash" =>  $entity["hash"],
+        "digest" =>  $entity["hash"],
         "metadata" => json_decode($entity["metadata"], true)
     ];
 }
