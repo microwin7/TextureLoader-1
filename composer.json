@@ -1,5 +1,5 @@
 {
-    "name": "gravita/json-texture-provider",
+    "name": "gravitlauncher/texture-loader",
     "description": "",
     "type": "project",
     "require": {
