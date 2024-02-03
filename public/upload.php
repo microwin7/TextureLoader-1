@@ -121,7 +121,7 @@ if ($assetType == "SKIN" && $options["modelSlim"] == true) {
 $metadata_json = json_encode($metadata);
 $pdo = $base->pdo;
 $sql = match(Config::$dbsystem) {
-    "mysql" => "INSERT INTO user_assets (uuid, name, hash, metadata) VALUES (:uuid, :name, :hash, :metadata) ON DUPLICATE KEY DO UPDATE SET hash = :hash, metadata = :metadata",
+    "mysql" => "INSERT INTO user_assets (uuid, name, hash, metadata) VALUES (:uuid, :name, :hash, :metadata) ON DUPLICATE KEY UPDATE hash = :hash, metadata = :metadata",
     "pgsql" => "INSERT INTO user_assets (uuid, name, hash, metadata) VALUES (:uuid, :name, :hash, :metadata) ON CONFLICT (uuid, name) DO UPDATE SET hash = :hash, metadata = :metadata"
 };
 $stmt = $pdo->prepare($sql);
