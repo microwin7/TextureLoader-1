@@ -18,7 +18,7 @@ class Config
     public static $maxUploadSize = 64 * 1024;
 
     public static $persistent = true;
-    public static $generateAvatar = false;
+    public static $generateAvatar = true;
 
     public static $ecdsaPublicKeyPath = "/ecdsa_id.pub";
     public static $allowedTypes = ["SKIN", "CAPE"];
