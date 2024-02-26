@@ -120,17 +120,21 @@ if (!file_exists($filePath)) {
 if($assetType == 'SKIN' && Config::$generateAvatar) {
     $scale = $width / 64;
     $skinSize = $scale * 8;
-    $image = imagecreatefromstring($content);
-    $newImage = imagecreatetruecolor($skinSize, $skinSize);
-    imagecopyresized($newImage, $image, 0, 0, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
-    imagecopyresized($newImage, $image, 0, 0, 5*$skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
-    imagepng($newImage, $fileinfo['tmp_name']);
-    imagedestroy($image);
-    imagedestroy($newImage);
-    $avatarContent = file_get_contents($fileinfo['tmp_name']);
-    $avatarHash = hash("sha256", $avatarContent);
-    $avatarFilePath = Config::$baseDir . $avatarHash . ".png";
-    file_put_contents($avatarFilePath, $avatarContent);
+    $avatarHash = $dao->getAvatarHashBySkinHash($hash, $skinSize);
+    if(!$avatarHash) {
+        $image = imagecreatefromstring($content);
+        $newImage = imagecreatetruecolor($skinSize, $skinSize);
+        imagecopyresized($newImage, $image, 0, 0, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
+        imagecopyresized($newImage, $image, 0, 0, 5*$skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
+        imagepng($newImage, $fileinfo['tmp_name']);
+        imagedestroy($image);
+        imagedestroy($newImage);
+        $avatarContent = file_get_contents($fileinfo['tmp_name']);
+        $avatarHash = hash("sha256", $avatarContent);
+        $avatarFilePath = Config::$baseDir . $avatarHash . ".png";
+        file_put_contents($avatarFilePath, $avatarContent);
+        $dao->updateAvatarCache($hash, $avatarHash, $skinSize);
+    }
     $dao->update($uuid, "AVATAR", $avatarHash, "{}");
 }
 $metadata = [];

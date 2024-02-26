@@ -50,4 +50,22 @@ class DAO {
         }
         return null;
     }
+
+    function getAvatarHashBySkinHash(string $skinHash, int $scale) : string|null {
+        $stmt = $this->pdo->prepare("SELECT avatarHash FROM user_assets_avatarcache WHERE skinHash = :skinHash AND scale = :scale");
+        $stmt->execute(['skinHash' => $skinHash, 'scale' => $scale]);
+        while (($entity = $stmt->fetch(PDO::FETCH_ASSOC))) {
+            return $entity["avatarHash"];
+        }
+        return null;
+    }
+
+    function updateAvatarCache(string $skinHash, string $avatarHash, int $scale) {
+        $sql = match($this->dialect) {
+            "mysql" => "INSERT INTO user_assets_avatarcache (skinHash, avatarHash, scale) VALUES (:skinHash, :avatarHash, :scale) ON DUPLICATE KEY DO UPDATE SET avatarHash = :avatarHash",
+            "pgsql" => "INSERT INTO user_assets_avatarcache (skinHash, avatarHash, scale) VALUES (:skinHash, :avatarHash, :scale) ON CONFLICT (skinHash, scale) DO UPDATE SET avatarHash = :avatarHash"
+        };
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['skinHash' => $skinHash, 'avatarHash' => $avatarHash, 'scale' => $scale]);
+    }
 }

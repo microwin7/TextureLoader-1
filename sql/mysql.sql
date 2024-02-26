@@ -6,3 +6,10 @@ CREATE TABLE `user_assets` (
   PRIMARY KEY (`uuid`, `name`),
   INDEX `uuid` (`uuid`)
 );
+CREATE TABLE `user_assets_avatarcache` (
+  `skinHash` TINYTEXT,
+  `avatarHash` TINYTEXT,
+  `scale` INT,
+  PRIMARY KEY (`skinHash`, `scale`),
+  INDEX `skinHash` (`skinHash`)
+);
