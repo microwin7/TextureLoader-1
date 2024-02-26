@@ -116,25 +116,22 @@ $pdo = $base->pdo;
 $dao = new DAO($pdo, Config::$dbsystem);
 if (!file_exists($filePath)) {
     file_put_contents($filePath, $content);
-    if($assetType == 'SKIN' && Config::$generateAvatar) {
-        $oldAvatar = $dao->getByUserUuid($uuid, "AVATAR");
-        if(!$oldAvatar) {
-            $scale = $width / 64;
-            $skinSize = $scale * 8;
-            $image = imagecreatefromstring($content);
-            $newImage = imagecreatetruecolor($skinSize, $skinSize);
-            imagecopyresized($newImage, $image, 0, 0, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
-            imagecopyresized($newImage, $image, 0, 0, 5*$skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
-            imagepng($newImage, $fileinfo['tmp_name']);
-            imagedestroy($image);
-            imagedestroy($newImage);
-            $avatarContent = file_get_contents($fileinfo['tmp_name']);
-            $avatarHash = hash("sha256", $avatarContent);
-            $avatarFilePath = Config::$baseDir . $avatarHash . ".png";
-            file_put_contents($avatarFilePath, $avatarContent);
-            $dao->update($uuid, "AVATAR", $avatarHash, "{}");
-        }
-    }
+}
+if($assetType == 'SKIN' && Config::$generateAvatar) {
+    $scale = $width / 64;
+    $skinSize = $scale * 8;
+    $image = imagecreatefromstring($content);
+    $newImage = imagecreatetruecolor($skinSize, $skinSize);
+    imagecopyresized($newImage, $image, 0, 0, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
+    imagecopyresized($newImage, $image, 0, 0, 5*$skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
+    imagepng($newImage, $fileinfo['tmp_name']);
+    imagedestroy($image);
+    imagedestroy($newImage);
+    $avatarContent = file_get_contents($fileinfo['tmp_name']);
+    $avatarHash = hash("sha256", $avatarContent);
+    $avatarFilePath = Config::$baseDir . $avatarHash . ".png";
+    file_put_contents($avatarFilePath, $avatarContent);
+    $dao->update($uuid, "AVATAR", $avatarHash, "{}");
 }
 $metadata = [];
 if ($assetType == "SKIN" && $options["modelSlim"] == true) {

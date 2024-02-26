@@ -13,9 +13,9 @@ class Config
     public static $baseUrl = "http://example.com/assets/";
     public static $baseDir = "assets/";
 
-    public static $maxUploadWidth = 64;
-    public static $maxUploadHeight = 64;
-    public static $maxUploadSize = 64 * 1024;
+    public static $maxUploadWidth = 16*64;
+    public static $maxUploadHeight = 16*64;
+    public static $maxUploadSize = 16*64 * 1024;
 
     public static $persistent = true;
     public static $generateAvatar = true;
