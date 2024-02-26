@@ -1,6 +1,7 @@
 <?php
 
 use Gravita\JsonTextureProvider\Base;
+use Gravita\JsonTextureProvider\DAO;
 use Gravita\JsonTextureProvider\Config\Config;
 use function Gravita\JsonTextureProvider\json_response;
 
@@ -21,15 +22,6 @@ if (!$uuid) {
 
 $base = new Base();
 $pdo = $base->pdo;
-
-$stmt = $pdo->prepare("SELECT hash,name,metadata FROM user_assets WHERE uuid=:uuid");
-$stmt->execute(['uuid' => $uuid]);
-$result = new ArrayObject();
-while (($entity = $stmt->fetch(PDO::FETCH_ASSOC))) {
-    $result[$entity["name"]] = [
-        "url" => Config::$baseUrl . $entity["hash"] . ".png",
-        "digest" =>  $entity["hash"],
-        "metadata" => json_decode($entity["metadata"], true)
-    ];
-}
+$dao = new DAO($pdo, Config::$dbsystem);
+$result = $dao->getAllByUserUuid($uuid);
 json_response(200, $result);

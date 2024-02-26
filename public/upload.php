@@ -1,6 +1,7 @@
 <?php
 
 use Gravita\JsonTextureProvider\Base;
+use Gravita\JsonTextureProvider\DAO;
 use Gravita\JsonTextureProvider\Config\Config;
 use function Gravita\JsonTextureProvider\json_response;
 use function Gravita\JsonTextureProvider\get_bearer_token;
@@ -120,12 +121,8 @@ if ($assetType == "SKIN" && $options["modelSlim"] == true) {
 }
 $metadata_json = json_encode($metadata);
 $pdo = $base->pdo;
-$sql = match(Config::$dbsystem) {
-    "mysql" => "INSERT INTO user_assets (uuid, name, hash, metadata) VALUES (:uuid, :name, :hash, :metadata) ON DUPLICATE KEY DO UPDATE SET hash = :hash, metadata = :metadata",
-    "pgsql" => "INSERT INTO user_assets (uuid, name, hash, metadata) VALUES (:uuid, :name, :hash, :metadata) ON CONFLICT (uuid, name) DO UPDATE SET hash = :hash, metadata = :metadata"
-};
-$stmt = $pdo->prepare($sql);
-$stmt->execute(['uuid' => $uuid, 'name' => $assetType, 'hash' => $hash, 'metadata' => $metadata_json]);
+$dao = new DAO($pdo, Config::$dbsystem);
+$dao->update($uuid, $assetType, $hash, $metadata_json);
 json_response(200, [
     "url" => Config::$baseUrl . $hash . ".png",
     "digest" =>  $hash,
