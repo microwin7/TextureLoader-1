@@ -1,14 +1,15 @@
 <?php
 
 use Gravita\JsonTextureProvider\Base;
+use Gravita\JsonTextureProvider\DAO;
 use Gravita\JsonTextureProvider\Config\Config;
 use function Gravita\JsonTextureProvider\json_response;
 use function Gravita\JsonTextureProvider\get_bearer_token;
 use function Gravita\JsonTextureProvider\parse_public_key;
 
-// ini_set('error_reporting', E_ALL); // FULL DEBUG 
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
+ini_set('error_reporting', E_ALL); // FULL DEBUG 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
 
 require_once(__DIR__ . '/../vendor/autoload.php');
 
@@ -111,21 +112,37 @@ if ($width > Config::$maxUploadWidth) {
 $hash = hash("sha256", $content);
 $filePath = Config::$baseDir . $hash . ".png";
 
+$pdo = $base->pdo;
+$dao = new DAO($pdo, Config::$dbsystem);
 if (!file_exists($filePath)) {
     file_put_contents($filePath, $content);
+}
+if($assetType == 'SKIN' && Config::$generateAvatar) {
+    $scale = $width / 64;
+    $skinSize = $scale * 8;
+    $avatarHash = $dao->getAvatarHashBySkinHash($hash, $skinSize);
+    if(!$avatarHash) {
+        $image = imagecreatefromstring($content);
+        $newImage = imagecreatetruecolor($skinSize, $skinSize);
+        imagecopyresized($newImage, $image, 0, 0, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
+        imagecopyresized($newImage, $image, 0, 0, 5*$skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
+        imagepng($newImage, $fileinfo['tmp_name']);
+        imagedestroy($image);
+        imagedestroy($newImage);
+        $avatarContent = file_get_contents($fileinfo['tmp_name']);
+        $avatarHash = hash("sha256", $avatarContent);
+        $avatarFilePath = Config::$baseDir . $avatarHash . ".png";
+        file_put_contents($avatarFilePath, $avatarContent);
+        $dao->updateAvatarCache($hash, $avatarHash, $skinSize);
+    }
+    $dao->update($uuid, "AVATAR", $avatarHash, "{}");
 }
 $metadata = [];
 if ($assetType == "SKIN" && $options["modelSlim"] == true) {
     $metadata["model"] = "slim";
 }
 $metadata_json = json_encode($metadata);
-$pdo = $base->pdo;
-$sql = match(Config::$dbsystem) {
-    "mysql" => "INSERT INTO user_assets (uuid, name, hash, metadata) VALUES (:uuid, :name, :hash, :metadata) ON DUPLICATE KEY UPDATE hash = :hash, metadata = :metadata",
-    "pgsql" => "INSERT INTO user_assets (uuid, name, hash, metadata) VALUES (:uuid, :name, :hash, :metadata) ON CONFLICT (uuid, name) DO UPDATE SET hash = :hash, metadata = :metadata"
-};
-$stmt = $pdo->prepare($sql);
-$stmt->execute(['uuid' => $uuid, 'name' => $assetType, 'hash' => $hash, 'metadata' => $metadata_json]);
+$dao->update($uuid, $assetType, $hash, $metadata_json);
 json_response(200, [
     "url" => Config::$baseUrl . $hash . ".png",
     "digest" =>  $hash,
