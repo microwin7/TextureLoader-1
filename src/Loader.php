@@ -74,7 +74,7 @@ class Loader
         $skinSize = $scale * 8;
         $avatarHash = $this->dao->getAvatarHashBySkinHash($skinHash, $skinSize);
         if (!$avatarHash) {
-            $tmpFile = tmpfile();
+            $tmpFile = fopen("php://temp", "rwb");
             $image = imagecreatefromstring($skinImageGetter());
             $newImage = imagecreatetruecolor($skinSize, $skinSize);
             imagecopyresized($newImage, $image, 0, 0, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
@@ -82,7 +82,8 @@ class Loader
             imagepng($newImage, $tmpFile);
             imagedestroy($image);
             imagedestroy($newImage);
-            $avatarContent = file_get_contents($tmpFile);
+            fseek($tmpFile, 0);
+            $avatarContent = fread($tmpFile, fstat($tmpFile)['size']);
             $avatarHash = hash("sha256", $avatarContent);
             $avatarFilePath = $baseDir . $avatarHash . ".png";
             file_put_contents($avatarFilePath, $avatarContent);

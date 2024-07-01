@@ -34,8 +34,6 @@ if (!$jwtToken) {
     exit(0);
 }
 
-$base = new Base();
-
 try {
 $jwt = parse_jwt_and_verify($jwtToken, $publicKey);
 } catch(Exception $e) {
@@ -71,6 +69,25 @@ if (!in_array($assetType, Config::$allowedTypes)) {
 }
 
 $uuid = $jwt->uuid;
+
+try {
+    // make a database connection
+    $pdo = new PDO(Config::getDSN(), Config::$user, Config::$password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_PERSISTENT => Config::$persistent]);
+
+    if (!$pdo) {
+        json_response(500, [
+            "error" => "Database error"
+        ]);
+        exit(0);
+    }
+} catch (PDOException $e) {
+    json_response(500, [
+        "error" => "Database error"
+    ]);
+    exit(0);
+}
+
+$dao = new DAO($pdo, Config::$dbsystem);
 
 if (!$uuid) {
     json_response(400, [

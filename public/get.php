@@ -21,9 +21,23 @@ if (!$uuid) {
     ]);
     exit(0);
 }
+try {
+    // make a database connection
+    $pdo = new PDO(Config::getDSN(), Config::$user, Config::$password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_PERSISTENT => Config::$persistent]);
 
-$base = new Base();
-$pdo = $base->pdo;
+    if (!$pdo) {
+        json_response(500, [
+            "error" => "Database error"
+        ]);
+        exit(0);
+    }
+} catch (PDOException $e) {
+    json_response(500, [
+        "error" => "Database error"
+    ]);
+    exit(0);
+}
+
 $dao = new DAO($pdo, Config::$dbsystem);
 try {
     $loader = new Loader($dao);

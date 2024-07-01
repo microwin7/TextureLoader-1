@@ -21,5 +21,8 @@
             "name": "gravit0"
         }
     ],
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "require-dev": {
+        "vimeo/psalm": "^6.0@dev"
+    }
 }
