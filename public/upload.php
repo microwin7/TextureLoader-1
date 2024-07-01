@@ -73,13 +73,6 @@ $uuid = $jwt->uuid;
 try {
     // make a database connection
     $pdo = new PDO(Config::getDSN(), Config::$user, Config::$password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_PERSISTENT => Config::$persistent]);
-
-    if (!$pdo) {
-        json_response(500, [
-            "error" => "Database error"
-        ]);
-        exit(0);
-    }
 } catch (PDOException $e) {
     json_response(500, [
         "error" => "Database error"
