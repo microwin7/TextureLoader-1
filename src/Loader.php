@@ -15,7 +15,7 @@ class Loader
         return $this->dao->getAllByUserUuid($uuid);
     }
 
-    public function upload($uuid, $fileinfo, $options, $assetType, UploadConfiguration $config): \ArrayObject
+    public function upload(string $uuid, $fileinfo, $options, string $assetType, UploadConfiguration $config): \ArrayObject
     {
         if ($fileinfo['size'] > $config->maxUploadSize) {
             throw new LoaderException("Image too big: Size limit");
@@ -51,7 +51,7 @@ class Loader
             file_put_contents($filePath, $content);
         }
         if ($assetType == 'SKIN' && $config->generateAvatar) {
-            $scale = $width / 64;
+            $scale = (int)($width / 64);
             $this->getAvatar($config->baseDir, function() use ($content) {
                 return $content;
             }, $hash, $uuid, $scale);
@@ -69,7 +69,7 @@ class Loader
         ]);
     }
 
-    public function getAvatar($baseDir, callable $skinImageGetter, $skinHash, $uuid, $scale) : string
+    public function getAvatar(string $baseDir, callable $skinImageGetter, string $skinHash, $uuid, int $scale) : string
     {
         $skinSize = $scale * 8;
         $avatarHash = $this->dao->getAvatarHashBySkinHash($skinHash, $skinSize);

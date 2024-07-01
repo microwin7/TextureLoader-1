@@ -15,7 +15,7 @@ class DAO {
         $this->dialect = $dialect;
     }
 
-    function update(string $uuid, string $assetType, string $hash, $metadata_json) {
+    function update(string $uuid, string $assetType, string $hash, string|false $metadata_json): void {
         $sql = match($this->dialect) {
             "mysql" => "INSERT INTO user_assets (uuid, name, hash, metadata) VALUES (:uuid, :name, :hash, :metadata) ON DUPLICATE KEY UPDATE hash = :hash, metadata = :metadata",
             "pgsql" => "INSERT INTO user_assets (uuid, name, hash, metadata) VALUES (:uuid, :name, :hash, :metadata) ON CONFLICT (uuid, name) DO UPDATE SET hash = :hash, metadata = :metadata"
@@ -60,7 +60,7 @@ class DAO {
         return null;
     }
 
-    function updateAvatarCache(string $skinHash, string $avatarHash, int $scale) {
+    function updateAvatarCache(string $skinHash, string $avatarHash, int $scale): void {
         $sql = match($this->dialect) {
             "mysql" => "INSERT INTO user_assets_avatarcache (skinHash, avatarHash, scale) VALUES (:skinHash, :avatarHash, :scale) ON DUPLICATE KEY DO UPDATE SET avatarHash = :avatarHash",
             "pgsql" => "INSERT INTO user_assets_avatarcache (skinHash, avatarHash, scale) VALUES (:skinHash, :avatarHash, :scale) ON CONFLICT (skinHash, scale) DO UPDATE SET avatarHash = :avatarHash"

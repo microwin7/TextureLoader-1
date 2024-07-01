@@ -6,20 +6,22 @@ use stdClass;
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
 
-function json_response($code, $data)
+function json_response($code, $data): void
 {
     http_response_code($code);
     header("Content-Type: application/json");
     echo json_encode($data);
 }
-function parse_public_key($path)
+function parse_public_key($path): \OpenSSLAsymmetricKey|false
 {
     return openssl_pkey_get_public("-----BEGIN PUBLIC KEY----- \n" . base64_encode(file_get_contents($path)) . "\n-----END PUBLIC KEY----- ");
 }
-/** 
+/**
  * Get header Authorization
- * */
-function get_authorization_header()
+ *
+ * @return null|string
+ */
+function get_authorization_header(): string|null
 {
     $headers = null;
     if (isset($_SERVER['Authorization'])) {
@@ -40,8 +42,10 @@ function get_authorization_header()
 
 /**
  * get access token from header
- * */
-function get_bearer_token()
+ *
+ * @return null|string
+ */
+function get_bearer_token(): string|null
 {
     $headers = get_authorization_header();
     // HEADER: Get the access token from the header
