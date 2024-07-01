@@ -3,6 +3,8 @@
 use Gravita\JsonTextureProvider\Base;
 use Gravita\JsonTextureProvider\DAO;
 use Gravita\JsonTextureProvider\Config\Config;
+use Gravita\JsonTextureProvider\Loader;
+use Gravita\JsonTextureProvider\LoaderException;
 use function Gravita\JsonTextureProvider\json_response;
 
 // ini_set('error_reporting', E_ALL); // FULL DEBUG 
@@ -23,5 +25,13 @@ if (!$uuid) {
 $base = new Base();
 $pdo = $base->pdo;
 $dao = new DAO($pdo, Config::$dbsystem);
-$result = $dao->getAllByUserUuid($uuid);
-json_response(200, $result);
+try {
+    $loader = new Loader($dao);
+    $result = $loader->get($uuid);
+    json_response(200, $result);
+} catch(LoaderException $e) {
+    json_response(400, [
+        "error" => $e->getMessage()
+    ]);
+    exit(0);
+}

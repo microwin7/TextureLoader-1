@@ -2,7 +2,10 @@
 
 use Gravita\JsonTextureProvider\Base;
 use Gravita\JsonTextureProvider\DAO;
+use Gravita\JsonTextureProvider\Loader;
+use Gravita\JsonTextureProvider\LoaderException;
 use Gravita\JsonTextureProvider\Config\Config;
+use Gravita\JsonTextureProvider\UploadConfiguration;
 use function Gravita\JsonTextureProvider\json_response;
 use function Gravita\JsonTextureProvider\get_bearer_token;
 use function Gravita\JsonTextureProvider\parse_public_key;
@@ -67,84 +70,20 @@ if (!$uuid) {
     exit(0);
 }
 
-if ($fileinfo['size'] > Config::$maxUploadSize) {
+try {
+    $uploadConfiguration = new UploadConfiguration();
+    $uploadConfiguration->baseDir = Config::$baseDir;
+    $uploadConfiguration->baseUrl = Config::$baseUrl;
+    $uploadConfiguration->generateAvatar = Config::$generateAvatar;
+    $uploadConfiguration->maxUploadHeight = Config::$maxUploadHeight;
+    $uploadConfiguration->maxUploadWidth = Config::$maxUploadWidth;
+    $uploadConfiguration->maxUploadSize = Config::$maxUploadSize;
+    $loader = new Loader($dao);
+    $result = $loader->upload($uuid, $fileinfo, $options, $assetType, $uploadConfiguration);
+    json_response(200, $result);
+} catch(LoaderException $e) {
     json_response(400, [
-        "error" => "Image too big: Size limit"
+        "error" => $e->getMessage()
     ]);
     exit(0);
 }
-
-$content = file_get_contents($fileinfo['tmp_name']);
-
-$size = getimagesizefromstring($content);
-
-if (!$size) {
-    json_response(400, [
-        "error" => "Upload file not a image"
-    ]);
-    exit(0);
-}
-
-$width = $size[0];
-$height = $size[1];
-$imgType = $size[2];
-
-if ($imgType != IMAGETYPE_PNG) {
-    json_response(400, [
-        "error" => "Image is not a png format"
-    ]);
-    exit(0);
-}
-
-if ($height > Config::$maxUploadHeight) {
-    json_response(400, [
-        "error" => "Image too big: Height limit"
-    ]);
-    exit(0);
-}
-
-if ($width > Config::$maxUploadWidth) {
-    json_response(400, [
-        "error" => "Image too big: Width limit"
-    ]);
-    exit(0);
-}
-$hash = hash("sha256", $content);
-$filePath = Config::$baseDir . $hash . ".png";
-
-$pdo = $base->pdo;
-$dao = new DAO($pdo, Config::$dbsystem);
-if (!file_exists($filePath)) {
-    file_put_contents($filePath, $content);
-}
-if($assetType == 'SKIN' && Config::$generateAvatar) {
-    $scale = $width / 64;
-    $skinSize = $scale * 8;
-    $avatarHash = $dao->getAvatarHashBySkinHash($hash, $skinSize);
-    if(!$avatarHash) {
-        $image = imagecreatefromstring($content);
-        $newImage = imagecreatetruecolor($skinSize, $skinSize);
-        imagecopyresized($newImage, $image, 0, 0, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
-        imagecopyresized($newImage, $image, 0, 0, 5*$skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
-        imagepng($newImage, $fileinfo['tmp_name']);
-        imagedestroy($image);
-        imagedestroy($newImage);
-        $avatarContent = file_get_contents($fileinfo['tmp_name']);
-        $avatarHash = hash("sha256", $avatarContent);
-        $avatarFilePath = Config::$baseDir . $avatarHash . ".png";
-        file_put_contents($avatarFilePath, $avatarContent);
-        $dao->updateAvatarCache($hash, $avatarHash, $skinSize);
-    }
-    $dao->update($uuid, "AVATAR", $avatarHash, "{}");
-}
-$metadata = [];
-if ($assetType == "SKIN" && $options["modelSlim"] == true) {
-    $metadata["model"] = "slim";
-}
-$metadata_json = json_encode($metadata);
-$dao->update($uuid, $assetType, $hash, $metadata_json);
-json_response(200, [
-    "url" => Config::$baseUrl . $hash . ".png",
-    "digest" =>  $hash,
-    "metadata" => $metadata
-]);

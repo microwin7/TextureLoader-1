@@ -22,11 +22,4 @@ class Config
 
     public static $ecdsaPublicKeyPath = "/ecdsa_id.pub";
     public static $allowedTypes = ["SKIN", "CAPE"];
-
-    public static function getDSN(): string {
-        return self::$dbsystem . ":host=" . self::$host . ";port=" . self::$port . ";dbname=" . self::$db . ";";
-    }
-    public static function getEcdsaPublicKeyPath(): string {
-        return dirname(__FILE__) . self::$ecdsaPublicKeyPath;
-    }
 }
