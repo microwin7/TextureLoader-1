@@ -2,6 +2,10 @@
 
 namespace Gravita\JsonTextureProvider;
 
+use stdClass;
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
 function json_response($code, $data)
 {
     http_response_code($code);
@@ -47,4 +51,14 @@ function get_bearer_token()
         }
     }
     return null;
+}
+
+
+
+function parse_jwt_and_verify($jwt, $publicKey): stdClass
+{
+    return JWT::decode(
+        $jwt,
+        new Key($publicKey, 'ES256')
+    );
 }

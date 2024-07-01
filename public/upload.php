@@ -9,6 +9,7 @@ use Gravita\JsonTextureProvider\UploadConfiguration;
 use function Gravita\JsonTextureProvider\json_response;
 use function Gravita\JsonTextureProvider\get_bearer_token;
 use function Gravita\JsonTextureProvider\parse_public_key;
+use function Gravita\JsonTextureProvider\parse_jwt_and_verify;
 
 // ini_set('error_reporting', E_ALL); // FULL DEBUG 
 // ini_set('display_errors', 1);
@@ -35,7 +36,15 @@ if (!$jwtToken) {
 
 $base = new Base();
 
-$jwt = $base->parse_jwt_and_verify($jwtToken, $publicKey);
+try {
+$jwt = parse_jwt_and_verify($jwtToken, $publicKey);
+} catch(Exception $e) {
+    json_response(400, [
+        "error" => $e->getMessage()
+    ]);
+    exit(0);
+}
+
 
 $fileinfo = $_FILES["file"] ?? null;
 $options = json_decode($_POST["options"], true);
