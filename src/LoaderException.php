@@ -2,6 +2,6 @@
 
 namespace Gravita\JsonTextureProvider;
 
-class LoaderException extends \Exception {
-
+class LoaderException extends \Exception
+{
 }

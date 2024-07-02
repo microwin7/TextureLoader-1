@@ -90,9 +90,7 @@ if (!$uuid) {
 }
 
 try {
-    $uploadConfiguration = new UploadConfiguration();
-    $uploadConfiguration->baseDir = Config::$baseDir;
-    $uploadConfiguration->baseUrl = Config::$baseUrl;
+    $uploadConfiguration = new UploadConfiguration(Config::$baseUrl, Config::$baseDir);
     $uploadConfiguration->generateAvatar = Config::$generateAvatar;
     $uploadConfiguration->maxUploadHeight = Config::$maxUploadHeight;
     $uploadConfiguration->maxUploadWidth = Config::$maxUploadWidth;

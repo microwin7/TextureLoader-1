@@ -9,8 +9,9 @@
     findUnusedCode="true"
 >
     <projectFiles>
-        <directory name="src" />
+        <directory name="config" />
         <directory name="public" />
+        <directory name="src" />
         <ignoreFiles>
             <directory name="vendor" />
         </ignoreFiles>

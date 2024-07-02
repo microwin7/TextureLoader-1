@@ -66,3 +66,13 @@ function parse_jwt_and_verify($jwt, $publicKey): stdClass
         new Key($publicKey, 'ES256')
     );
 }
+
+function str_ends_with_slash(string $string, bool $needle_ends_with_slash = TRUE): string
+{
+    if (str_ends_with($string, DIRECTORY_SEPARATOR)) {
+        if (!$needle_ends_with_slash) $string =  substr($string, 0, -1);
+    } else {
+        if ($needle_ends_with_slash) $string .=  DIRECTORY_SEPARATOR;
+    }
+    return $string;
+}

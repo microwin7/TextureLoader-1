@@ -2,6 +2,8 @@
 
 namespace Gravita\JsonTextureProvider;
 
+use TypeError;
+
 class Loader
 {
     private readonly DAO $dao;
@@ -45,14 +47,14 @@ class Loader
             throw new LoaderException("Image too big: Width limit");
         }
         $hash = hash("sha256", $content);
-        $filePath = $config->baseDir . $hash . ".png";
+        $filePath = $config->getBaseDir() . $hash . ".png";
 
         if (!file_exists($filePath)) {
             file_put_contents($filePath, $content);
         }
         if ($assetType == 'SKIN' && $config->generateAvatar) {
             $scale = (int)($width / 64);
-            $this->getAvatar($config->baseDir, function() use ($content) {
+            $this->getAvatar($config->getBaseDir(), function () use ($content) {
                 return $content;
             }, $hash, $uuid, $scale);
         }
@@ -63,20 +65,23 @@ class Loader
         $metadata_json = json_encode($metadata);
         $this->dao->update($uuid, $assetType, $hash, $metadata_json);
         return new \ArrayObject([
-            "url" => $config->baseUrl . $hash . ".png",
+            "url" => $config->getBaseUrl() . $hash . ".png",
             "digest" => $hash,
             "metadata" => $metadata
         ]);
     }
 
-    public function getAvatar(string $baseDir, callable $skinImageGetter, string $skinHash, $uuid, int $scale) : string
+    public function getAvatar(string $baseDir, callable $skinImageGetter, string $skinHash, string $uuid, int $scale): string
     {
         $skinSize = $scale * 8;
         $avatarHash = $this->dao->getAvatarHashBySkinHash($skinHash, $skinSize);
-        if (!$avatarHash) {
+        if ($avatarHash !== null) {
             $tmpFile = fopen("php://temp", "rwb");
+            if ($tmpFile === false) throw new TypeError('Cannot Initialize new stream read-write in php://temp');
             $image = imagecreatefromstring($skinImageGetter());
+            if ($image === false) throw new TypeError('Error reading data. This file is not an image.');
             $newImage = imagecreatetruecolor($skinSize, $skinSize);
+            if ($newImage === false) throw new TypeError('Cannot Initialize new GD image stream');
             imagecopyresized($newImage, $image, 0, 0, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
             imagecopyresized($newImage, $image, 0, 0, 5 * $skinSize, $skinSize, $skinSize, $skinSize, $skinSize, $skinSize);
             imagepng($newImage, $tmpFile);
